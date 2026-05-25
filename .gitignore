@@ -1,0 +1,10 @@
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+
+# Node (if a build step is added later)
+node_modules/
+npm-debug.log*
+
+# Design reference image — not part of the app
+_ref_thekitchen.jpg

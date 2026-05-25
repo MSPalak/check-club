@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "family-list",
+      "runtimeExecutable": "D:\\dev\\node\\node.exe",
+      "runtimeArgs": ["server.js"],
+      "port": 4500
+    }
+  ]
+}

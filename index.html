@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FAE7CB" />
+<title>Check Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Check Club" />
+<style>
+  :root {
+    --bg: #FAE7CB;        /* warm cream */
+    --card: #ffffff;
+    --text: #2B2233;      /* deep plum-charcoal */
+    --muted: #A99FA0;
+    --line: #F1E6D6;
+    --accent: #F1571C;    /* vivid orange */
+    --accent-dark: #C8430F;
+    --plum: #3D1133;      /* deep plum */
+    --purple-a: #9A86D9;  /* welcome gradient top */
+    --purple-b: #6E54B5;  /* welcome gradient bottom */
+    --mint: #BFE6D3;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  /* ---------- WELCOME ---------- */
+  #welcome {
+    background: #fffdf8;
+    color: var(--text);
+    text-align: center;
+    padding: 0 24px;
+    padding-top: env(safe-area-inset-top);
+    overflow: hidden;
+    position: relative;
+  }
+  .welcome-inner {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .wc-eyebrow {
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: #E59B2E; font-weight: 600; margin: 0;
+  }
+  .wc-title {
+    font-family: "Fredoka", "Poppins", sans-serif;
+    font-size: 48px; font-weight: 600; color: #4a3a16;
+    line-height: 1.0; margin: 2px 0 4px;
+  }
+  .wc-sub { font-size: 15px; color: #a99a7d; max-width: 290px; margin: 0; line-height: 1.5; }
+  .name-field {
+    width: 100%; max-width: 300px;
+    margin-top: 14px;
+    border: 2px solid #FBE4B0; border-radius: 16px;
+    padding: 15px 18px; font-size: 16px;
+    text-align: center; outline: none;
+    color: var(--text); background: #fff;
+    font-family: inherit;
+  }
+  .name-field:focus { border-color: #F6B73C; }
+  .start-btn {
+    width: 100%; max-width: 300px;
+    border: none; border-radius: 16px;
+    background: linear-gradient(135deg, #FFC23C 0%, #F79420 100%);
+    color: #fff;
+    padding: 16px; font-size: 17px; font-weight: 700;
+    cursor: pointer; margin-top: 4px;
+    box-shadow: 0 10px 22px rgba(247,148,32,0.35);
+    font-family: inherit;
+  }
+  .start-btn:active { transform: scale(0.98); }
+
+  /* recents on welcome */
+  .recents { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .recents-title { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #b9a97f; font-weight: 600; text-align: left; margin: 2px 2px 2px; }
+  .recent-card {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    background: #fff; border: 1px solid #F3E6C8; border-radius: 14px;
+    padding: 12px 14px; cursor: pointer; text-align: left; font-family: inherit;
+    box-shadow: 0 4px 12px rgba(120,84,40,0.06);
+  }
+  .recent-card:active { transform: scale(0.99); }
+  .recent-card .rc-emoji { font-size: 20px; }
+  .recent-card .rc-main { flex: 1; min-width: 0; }
+  .recent-card .rc-name { font-weight: 700; font-size: 15px; color: #4a3a16; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent-card .rc-meta { font-size: 12px; color: #b3a585; margin-top: 1px; }
+  .recent-card .rc-del { border: none; background: none; color: #cbb98f; font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 8px; }
+  .recent-card .rc-del:active { background: #f5ecd6; }
+  .cap-note { font-size: 12.5px; color: #c98a3d; margin: 2px 0 0; min-height: 16px; }
+
+  /* list topbar */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+  .ghost-btn {
+    border: none; background: none; color: #8a7f6f; font-size: 15px; font-weight: 600;
+    cursor: pointer; padding: 8px 6px; border-radius: 10px; font-family: inherit;
+  }
+  .ghost-btn:active { background: rgba(0,0,0,0.04); }
+  .ghost-btn.share { color: #fff; background: var(--accent); padding: 8px 18px; border-radius: 20px; box-shadow: 0 4px 12px rgba(241,87,28,0.28); }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: #3a2d12; color: #fff; padding: 12px 18px; border-radius: 14px;
+    font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s; z-index: 50; max-width: 86%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- decorations + animations ---------- */
+  .deco { position: absolute; z-index: 1; pointer-events: none; }
+  .sun     { top: -16px; left: -22px; animation: bob 5s ease-in-out infinite; }
+  .flowers { bottom: -4px; right: -18px; }
+
+  .sun .rays { transform-box: view-box; transform-origin: 110px 110px; animation: spin 26s linear infinite; }
+  .sun .eye  { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  .sun .smile{ transform-box: fill-box; transform-origin: center; animation: grin 3.5s ease-in-out infinite; }
+
+  .flower      { transform-box: fill-box; transform-origin: bottom center; }
+  .f-yellow    { animation: sway 4s ease-in-out infinite; }
+  .f-daisy     { animation: sway 3.4s ease-in-out infinite reverse; }
+  .heart       { transform-box: fill-box; transform-origin: center; opacity: 0; }
+  .h1 { animation: floatHeart 3.2s ease-in-out infinite; }
+  .h2 { animation: floatHeart 3.2s ease-in-out 1.3s infinite; }
+
+  @keyframes bob   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes spin  { to { transform: rotate(360deg); } }
+  @keyframes blink { 0%,90%,100% { transform: scaleY(1); } 94%,97% { transform: scaleY(0.15); } }
+  @keyframes grin  { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(1.15); } }
+  @keyframes sway  { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  @keyframes floatHeart {
+    0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateY(-46px) scale(1.1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sun, .sun .rays, .sun .eye, .sun .smile, .flower, .heart { animation: none; }
+  }
+
+  /* ---------- LIST ---------- */
+  #listScreen { background: #ffffff; position: relative; overflow-x: hidden; }
+  .app { width: 100%; max-width: 600px; margin: 0 auto; padding: 4px 16px 120px; position: relative; z-index: 2; }
+
+  /* sky scene */
+  .sky { position: relative; height: 132px; width: 100%; pointer-events: none; z-index: 1; padding-top: env(safe-area-inset-top); }
+  .clouds-l { position: absolute; top: 8px; left: -8px; }
+  .sun-sm   { position: absolute; top: -2px; right: -6px; }
+  .bird     { position: absolute; top: 44px; left: 0; animation: fly 11s linear infinite; }
+  .bird .wing { transform-box: fill-box; transform-origin: 30px 22px; animation: flap 0.45s ease-in-out infinite; }
+  .cloud-drift { animation: drift 16s ease-in-out infinite; }
+  .sun-sm .rays  { transform-box: view-box; transform-origin: 110px 110px; animation: spin 30s linear infinite; }
+  .sun-sm .eye   { transform-box: fill-box; transform-origin: center; animation: blink 4.5s infinite; }
+  .sun-sm .smile { transform-box: fill-box; transform-origin: center; animation: grin 3.5s ease-in-out infinite; }
+
+  /* ground */
+  .ground { position: fixed; bottom: 0; left: 0; z-index: 0; pointer-events: none; }
+
+  @keyframes fly  {
+    0%   { transform: translateX(-60px) translateY(0); }
+    45%  { transform: translateX(42vw) translateY(-16px); }
+    70%  { transform: translateX(70vw) translateY(6px); }
+    100% { transform: translateX(108vw) translateY(-4px); }
+  }
+  @keyframes flap { 0%,100% { transform: rotate(-20deg); } 50% { transform: rotate(16deg); } }
+  @keyframes drift{ 0%,100% { transform: translateX(0); } 50% { transform: translateX(12px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .bird, .bird .wing, .cloud-drift, .sun-sm .rays, .sun-sm .eye, .sun-sm .smile { animation: none; }
+  }
+  .list-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  #listName {
+    flex: 1; min-width: 0; font-size: 28px; font-weight: 800; border: none; background: transparent;
+    color: var(--text); outline: none; padding: 4px 0; letter-spacing: -0.5px;
+    font-family: inherit;
+  }
+  #listName:focus { border-bottom: 2px solid var(--accent); }
+  .status { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .dot.local { background: #c9a227; }
+  .dot.shared { background: var(--accent); }
+
+  /* search + assigned-to */
+  .tool-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .search {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px;
+  }
+  .search svg { flex: 0 0 auto; }
+  .search input {
+    flex: 1; border: none; outline: none; background: transparent;
+    padding: 13px 0; font-size: 15px; color: var(--text); font-family: inherit;
+  }
+  .search:focus-within { border-color: var(--accent); }
+  #assignTo {
+    width: 42%; max-width: 160px; border: 1px solid var(--line); background: #fff;
+    border-radius: 12px; padding: 13px 12px; font-size: 15px; color: var(--text);
+    outline: none; font-family: inherit;
+  }
+  #assignTo:focus { border-color: var(--accent); }
+  .add-btn-full {
+    width: 100%; border: none; background: var(--accent); color: #fff; border-radius: 12px;
+    padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 20px;
+    box-shadow: 0 6px 16px rgba(241,87,28,0.28); font-family: inherit;
+  }
+  .add-btn-full:active { opacity: 0.9; }
+
+  /* grouped-by-person */
+  .group { margin-bottom: 16px; }
+  .group-head { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 8px; }
+  .group-head .who { font-weight: 700; font-size: 15px; color: var(--text); }
+  .group-head .count { font-size: 12px; color: #fff; background: var(--accent); border-radius: 20px; padding: 2px 10px; font-weight: 600; }
+
+  ul { list-style: none; margin: 0; padding: 0; background: var(--card); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(110,84,181,0.10); }
+  li { display: flex; align-items: center; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line); }
+  li:last-child { border-bottom: none; }
+  .num { color: var(--muted); font-size: 15px; font-weight: 600; min-width: 22px; }
+  .item-text { flex: 1; font-size: 16px; color: var(--text); word-break: break-word; }
+  li.done .item-text { color: var(--muted); text-decoration: line-through; }
+
+  .check {
+    appearance: none; -webkit-appearance: none;
+    width: 26px; height: 26px; min-width: 26px;
+    border: 2px solid #cfcfcf; border-radius: 8px; cursor: pointer;
+    position: relative; background: #fff; transition: all 0.12s ease;
+  }
+  .check:checked { background: var(--accent); border-color: var(--accent); }
+  .check:checked::after {
+    content: ""; position: absolute; left: 8px; top: 3px;
+    width: 6px; height: 12px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg);
+  }
+  .del { border: none; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+  .del:active { background: #f0f0f0; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 15px; }
+</style>
+</head>
+<body>
+
+  <!-- WELCOME SCREEN -->
+  <section id="welcome" class="screen active">
+
+    <!-- Sun (top-left), blinking + smiling -->
+    <svg class="deco sun" width="200" height="200" viewBox="0 0 220 220" aria-hidden="true">
+      <g class="rays" fill="#FFB52E">
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(0 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(30 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(60 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(90 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(120 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(150 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(180 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(210 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(240 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(270 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(300 110 110)"/>
+        <ellipse cx="110" cy="40" rx="11" ry="28" transform="rotate(330 110 110)"/>
+      </g>
+      <circle cx="110" cy="110" r="60" fill="#FFC83D"/>
+      <circle cx="84" cy="124" r="9" fill="#F58C6E" opacity="0.55"/>
+      <circle cx="136" cy="124" r="9" fill="#F58C6E" opacity="0.55"/>
+      <g fill="none" stroke="#5a3b1a" stroke-width="4.5" stroke-linecap="round">
+        <path class="eye" d="M82 104 q9 -11 18 0"/>
+        <path class="eye" d="M120 104 q9 -11 18 0"/>
+        <path class="smile" d="M88 122 q22 22 44 0"/>
+      </g>
+    </svg>
+
+    <!-- Flowers (bottom-right), swaying + smiling, with floating hearts -->
+    <svg class="deco flowers" width="240" height="280" viewBox="0 0 260 300" aria-hidden="true">
+      <!-- daisy (white) -->
+      <g class="flower f-daisy">
+        <path d="M96 300 C96 250 96 220 96 196" fill="none" stroke="#5C9A4F" stroke-width="5" stroke-linecap="round"/>
+        <path d="M96 250 q-26 -6 -34 -26 q26 -2 34 14" fill="#6CB85C"/>
+        <g fill="#ffffff" stroke="#EDE7D8" stroke-width="1.5">
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(0 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(45 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(90 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(135 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(180 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(225 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(270 96 182)"/>
+          <ellipse cx="96" cy="160" rx="9" ry="20" transform="rotate(315 96 182)"/>
+        </g>
+        <circle cx="96" cy="182" r="15" fill="#F6C544"/>
+        <g fill="#7a5a1a"><circle cx="91" cy="180" r="2"/><circle cx="101" cy="180" r="2"/></g>
+        <path d="M90 185 q6 6 12 0" fill="none" stroke="#7a5a1a" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- big yellow flower -->
+      <g class="flower f-yellow">
+        <path d="M178 300 C178 250 178 200 178 150" fill="none" stroke="#5C9A4F" stroke-width="6" stroke-linecap="round"/>
+        <path d="M178 210 q30 -8 40 -32 q-30 -2 -40 18" fill="#6CB85C"/>
+        <g fill="#FFCF4A" stroke="#F4B72E" stroke-width="2">
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(0 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(45 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(90 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(135 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(180 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(225 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(270 178 134)"/>
+          <ellipse cx="178" cy="104" rx="13" ry="30" transform="rotate(315 178 134)"/>
+        </g>
+        <circle cx="178" cy="134" r="24" fill="#5b4326"/>
+        <g fill="#ffffff"><circle cx="170" cy="131" r="3"/><circle cx="186" cy="131" r="3"/></g>
+        <path d="M168 139 q10 10 20 0" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <!-- floating hearts -->
+      <path class="heart h1" d="M214 92 c-4 -8 -16 -6 -16 3 c0 7 16 15 16 15 c0 0 16 -8 16 -15 c0 -9 -12 -11 -16 -3 z" fill="#FBD54B"/>
+      <path class="heart h2" d="M120 120 c-3 -6 -12 -4.5 -12 2.2 c0 5.2 12 11 12 11 c0 0 12 -5.8 12 -11 c0 -6.7 -9 -8.2 -12 -2.2 z" fill="#FBD54B"/>
+    </svg>
+
+    <div class="welcome-inner">
+      <p class="wc-eyebrow">Welcome to</p>
+      <h1 class="wc-title">Check Club</h1>
+      <p class="wc-sub">A sunny shared checklist for your family &amp; friends. Add things — anyone can tick them off!</p>
+
+      <div id="recents" class="recents"></div>
+
+      <input id="setupName" class="name-field" type="text" placeholder="Name a new list (e.g. Chores)" />
+      <button id="startBtn" class="start-btn">Create list ☀️</button>
+      <p id="capNote" class="cap-note"></p>
+    </div>
+  </section>
+
+  <!-- LIST SCREEN -->
+  <section id="listScreen" class="screen">
+
+    <!-- animated sky: clouds + flying bird + smiling sun -->
+    <div class="sky" aria-hidden="true">
+      <svg class="clouds-l cloud-drift" viewBox="0 0 170 90" width="150">
+        <g fill="#ffffff" stroke="#DCE7EF" stroke-width="2.5">
+          <ellipse cx="45" cy="32" rx="28" ry="18"/>
+          <ellipse cx="72" cy="36" rx="22" ry="15"/>
+          <ellipse cx="22" cy="42" rx="20" ry="14"/>
+          <rect x="20" y="36" width="62" height="16" rx="8" stroke="none"/>
+        </g>
+        <g fill="#ffffff" stroke="#DCE7EF" stroke-width="2.5">
+          <ellipse cx="122" cy="64" rx="24" ry="15"/>
+          <ellipse cx="144" cy="66" rx="17" ry="11"/>
+          <rect x="118" y="58" width="28" height="12" rx="6" stroke="none"/>
+        </g>
+      </svg>
+
+      <svg class="bird" viewBox="0 0 60 50" width="48">
+        <path d="M6 26 L18 22 L16 31 Z" fill="#3E8CC0"/>
+        <ellipse cx="30" cy="25" rx="16" ry="11" fill="#5BB0E0"/>
+        <ellipse cx="33" cy="29" rx="11" ry="7" fill="#CDEBFB"/>
+        <circle cx="44" cy="20" r="8" fill="#5BB0E0"/>
+        <path d="M51 19 L60 21 L51 24 Z" fill="#F0A640"/>
+        <circle cx="45" cy="18" r="1.7" fill="#1b3a4a"/>
+        <path class="wing" d="M28 22 q8 -16 18 -6 q-10 6 -18 6 z" fill="#3E8CC0"/>
+      </svg>
+
+      <svg class="sun-sm" viewBox="0 0 220 230" width="124">
+        <g class="rays" fill="#FBCB52">
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(0 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(30 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(60 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(90 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(120 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(150 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(180 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(210 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(240 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(270 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(300 110 110)"/>
+          <ellipse cx="110" cy="44" rx="10" ry="26" transform="rotate(330 110 110)"/>
+        </g>
+        <circle cx="110" cy="110" r="58" fill="#FCD45E"/>
+        <circle cx="86" cy="122" r="8.5" fill="#F58C6E" opacity="0.5"/>
+        <circle cx="134" cy="122" r="8.5" fill="#F58C6E" opacity="0.5"/>
+        <g fill="none" stroke="#8a6a2a" stroke-width="4.5" stroke-linecap="round">
+          <path class="eye" d="M84 106 q9 -10 18 0"/>
+          <path class="eye" d="M118 106 q9 -10 18 0"/>
+          <path class="smile" d="M90 120 q20 20 40 0"/>
+        </g>
+        <g fill="#ffffff" stroke="#DCE7EF" stroke-width="2.5">
+          <ellipse cx="78" cy="180" rx="32" ry="19"/>
+          <ellipse cx="120" cy="188" rx="40" ry="22"/>
+          <ellipse cx="152" cy="180" rx="24" ry="15"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="app">
+      <div class="topbar">
+        <button id="backBtn" class="ghost-btn">‹ Lists</button>
+        <button id="shareBtn" class="ghost-btn share">Share</button>
+      </div>
+      <div class="list-header">
+        <input id="listName" type="text" value="Our List" aria-label="List name" />
+      </div>
+      <div class="status" id="status"></div>
+
+      <div class="tool-row">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b9b0a2" stroke-width="2.4" stroke-linecap="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>
+          </svg>
+          <input id="newItem" type="text" placeholder="Search or add a task…" autocomplete="off" />
+        </div>
+        <input id="assignTo" type="text" placeholder="Assigned to…" autocomplete="off" />
+      </div>
+      <button id="addBtn" class="add-btn-full">Add task</button>
+
+      <div id="list"></div>
+    </div>
+
+    <!-- ground bushes -->
+    <svg class="ground" viewBox="0 0 220 120" width="200" aria-hidden="true">
+      <g fill="#6CB85C">
+        <circle cx="42" cy="98" r="40"/>
+        <circle cx="92" cy="108" r="46"/>
+        <circle cx="142" cy="104" r="36"/>
+      </g>
+      <g fill="#5C9A4F">
+        <circle cx="20" cy="120" r="34"/>
+        <circle cx="72" cy="122" r="40"/>
+        <circle cx="122" cy="120" r="34"/>
+      </g>
+    </svg>
+  </section>
+
+  <div id="toast" class="toast"></div>
+
+<script type="module">
+/* ============================================================
+   CHECK CLUB  —  installable multi-list app (PWA)
+   Up to 5 lists, grouped tasks, per-list share links (?list=<id>).
+   Works now (saves on this device). To SHARE live across devices,
+   paste your Firebase config into firebaseConfig below (one-time).
+   ============================================================ */
+
+const firebaseConfig = null; // <-- paste Firebase config object here to enable group sync
+
+const MAX_LISTS = 5;
+const LISTS_KEY = "checkClub.lists";        // [{id, name, createdAt}]
+const ACTIVE_KEY = "checkClub.active";      // last opened list id
+const firebaseReady = !!(firebaseConfig && firebaseConfig.apiKey);
+
+let items = {};
+let store = null;
+let currentListId = null;
+
+const welcome   = document.getElementById("welcome");
+const listScreen= document.getElementById("listScreen");
+const setupName = document.getElementById("setupName");
+const startBtn  = document.getElementById("startBtn");
+const recentsEl = document.getElementById("recents");
+const capNote   = document.getElementById("capNote");
+const listNameEl= document.getElementById("listName");
+const listEl    = document.getElementById("list");
+const statusEl  = document.getElementById("status");
+const inputEl   = document.getElementById("newItem");
+const assignEl  = document.getElementById("assignTo");
+const addBtn    = document.getElementById("addBtn");
+const backBtn   = document.getElementById("backBtn");
+const shareBtn  = document.getElementById("shareBtn");
+const toastEl   = document.getElementById("toast");
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function newListId() { return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); }
+
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+
+// ---------- list registry (local) ----------
+function loadLists() { try { return JSON.parse(localStorage.getItem(LISTS_KEY)) || []; } catch { return []; } }
+function saveLists(arr) { localStorage.setItem(LISTS_KEY, JSON.stringify(arr)); }
+function registerList(id, name) {
+  let lists = loadLists().filter(l => l.id !== id);
+  lists.unshift({ id, name, createdAt: Date.now() });
+  saveLists(lists.slice(0, MAX_LISTS));
+}
+function renameList(id, name) {
+  const lists = loadLists().map(l => l.id === id ? { ...l, name } : l);
+  saveLists(lists);
+}
+function removeList(id) {
+  saveLists(loadLists().filter(l => l.id !== id));
+  localStorage.removeItem("checkClub.list." + id);
+}
+function localItemCount(id) {
+  try { const d = JSON.parse(localStorage.getItem("checkClub.list." + id)); return d && d.items ? Object.keys(d.items).length : 0; }
+  catch { return 0; }
+}
+
+// ---------- welcome / recents ----------
+function renderRecents() {
+  const lists = loadLists();
+  recentsEl.innerHTML = "";
+  if (lists.length) {
+    const title = document.createElement("div");
+    title.className = "recents-title";
+    title.textContent = "Your lists";
+    recentsEl.appendChild(title);
+
+    lists.forEach(l => {
+      const card = document.createElement("button");
+      card.className = "recent-card";
+      card.type = "button";
+
+      const emoji = document.createElement("span"); emoji.className = "rc-emoji"; emoji.textContent = "📋";
+      const main = document.createElement("span"); main.className = "rc-main";
+      const nm = document.createElement("div"); nm.className = "rc-name"; nm.textContent = l.name;
+      const meta = document.createElement("div"); meta.className = "rc-meta";
+      const n = localItemCount(l.id);
+      meta.textContent = firebaseReady ? "Shared list" : (n + (n === 1 ? " task" : " tasks"));
+      main.append(nm, meta);
+
+      const del = document.createElement("span"); del.className = "rc-del"; del.innerHTML = "&times;"; del.title = "Remove list";
+      del.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (confirm('Remove "' + l.name + '" from your lists?')) { removeList(l.id); renderRecents(); }
+      });
+
+      card.append(emoji, main, del);
+      card.addEventListener("click", () => openList(l.id));
+      recentsEl.appendChild(card);
+    });
+  }
+
+  // cap handling
+  const atCap = lists.length >= MAX_LISTS;
+  startBtn.disabled = atCap;
+  startBtn.style.opacity = atCap ? "0.5" : "1";
+  setupName.disabled = atCap;
+  capNote.textContent = atCap
+    ? "You've reached " + MAX_LISTS + " lists (the max you can share). Remove one to add another."
+    : (lists.length ? (MAX_LISTS - lists.length) + " more list" + (MAX_LISTS - lists.length === 1 ? "" : "s") + " available." : "");
+}
+
+function showWelcome() {
+  listScreen.classList.remove("active");
+  welcome.classList.add("active");
+  renderRecents();
+}
+
+// ---------- screen flow ----------
+function showList() {
+  welcome.classList.remove("active");
+  listScreen.classList.add("active");
+  inputEl.focus();
+}
+
+async function openList(id, isNew) {
+  currentListId = id;
+  localStorage.setItem(ACTIVE_KEY, id);
+  history.replaceState(null, "", location.pathname + "?list=" + id);
+  try {
+    store = firebaseReady ? await makeSharedStore(id) : makeLocalStore(id, isNew);
+  } catch (err) {
+    console.error("Falling back to local mode:", err);
+    store = makeLocalStore(id, isNew);
+  }
+  showList();
+}
+
+// create a new list from the welcome field
+startBtn.addEventListener("click", () => {
+  if (loadLists().length >= MAX_LISTS) { renderRecents(); return; }
+  const name = setupName.value.trim() || "Our List";
+  const id = newListId();
+  registerList(id, name);
+  localStorage.setItem("checkClub.list." + id, JSON.stringify({ name, items: {} }));
+  setupName.value = "";
+  openList(id, true);
+});
+
+// list name editing
+listNameEl.addEventListener("change", () => {
+  const name = listNameEl.value.trim() || "Our List";
+  listNameEl.value = name;
+  if (store && store.setName) store.setName(name);
+  if (currentListId) renameList(currentListId, name);
+});
+
+// back to the lists hub
+backBtn.addEventListener("click", showWelcome);
+
+// share the current list
+shareBtn.addEventListener("click", async () => {
+  const url = location.origin + location.pathname + "?list=" + currentListId;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast(firebaseReady ? "Link copied! Anyone in your group can open & edit it." : "Link copied. (Live sharing turns on once the group database is connected.)");
+  } catch {
+    window.prompt("Copy this link to share your list:", url);
+  }
+});
+
+// ---------- rendering ----------
+function buildRow(id, it, index) {
+  const li = document.createElement("li");
+  if (it.done) li.classList.add("done");
+
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = index + "-";
+
+  const span = document.createElement("span");
+  span.className = "item-text";
+  span.textContent = it.text;
+
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.className = "check";
+  cb.checked = !!it.done;
+  cb.addEventListener("change", () => store.toggle(id, cb.checked));
+
+  const del = document.createElement("button");
+  del.className = "del";
+  del.innerHTML = "&times;";
+  del.title = "Remove";
+  del.addEventListener("click", () => store.remove(id));
+
+  li.append(num, span, cb, del);
+  return li;
+}
+
+function render() {
+  const q = (inputEl.value || "").trim().toLowerCase();
+  const matches = Object.entries(items)
+    .filter(([, it]) => !q || it.text.toLowerCase().includes(q))
+    .sort((a, b) => a[1].ts - b[1].ts);
+
+  if (matches.length === 0) {
+    const who = assignEl.value.trim();
+    let msg;
+    if (q) msg = 'No tasks match “' + q + '”. Tap Add to create it' + (who ? ' for ' + who : '') + '.';
+    else   msg = 'No tasks yet. Type a task, choose who it’s for, then tap Add.';
+    listEl.innerHTML = '<div class="empty"></div>';
+    listEl.firstChild.textContent = msg;
+    return;
+  }
+
+  // group by assignee, preserving first-seen order
+  const groups = new Map();
+  for (const [id, it] of matches) {
+    const who = (it.assignee && it.assignee.trim()) ? it.assignee.trim() : "Unassigned";
+    if (!groups.has(who)) groups.set(who, []);
+    groups.get(who).push([id, it]);
+  }
+
+  listEl.innerHTML = "";
+  for (const [who, rows] of groups) {
+    const wrap = document.createElement("div");
+    wrap.className = "group";
+
+    const head = document.createElement("div");
+    head.className = "group-head";
+    const whoEl = document.createElement("span");
+    whoEl.className = "who";
+    whoEl.textContent = who;
+    const countEl = document.createElement("span");
+    countEl.className = "count";
+    const doneCount = rows.filter(([, it]) => it.done).length;
+    countEl.textContent = doneCount + "/" + rows.length;
+    head.append(whoEl, countEl);
+
+    const ul = document.createElement("ul");
+    rows.forEach(([id, it], i) => ul.appendChild(buildRow(id, it, i + 1)));
+
+    wrap.append(head, ul);
+    listEl.appendChild(wrap);
+  }
+}
+
+function addItem() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  const assignee = assignEl.value.trim();
+  store.add({ text, done: false, ts: Date.now(), assignee });
+  inputEl.value = "";          // clear the task/search field
+  render();                    // refresh (assignee stays so more tasks go to same person)
+  inputEl.focus();
+}
+addBtn.addEventListener("click", addItem);
+inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") addItem(); });
+inputEl.addEventListener("input", render);   // live search as you type
+
+// ---------- LOCAL store (per list) ----------
+function makeLocalStore(id, isNew) {
+  const KEY = "checkClub.list." + id;
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || { name: "Our List", items: {} }; } catch { return { name: "Our List", items: {} }; } };
+  let data = load();
+  items = data.items || {};
+  listNameEl.value = data.name || "Our List";
+  const save = () => localStorage.setItem(KEY, JSON.stringify({ name: listNameEl.value, items }));
+
+  window.addEventListener("storage", (e) => {
+    if (e.key === KEY) { data = load(); items = data.items || {}; listNameEl.value = data.name || "Our List"; render(); }
+  });
+  statusEl.innerHTML = '<span class="dot local"></span>Saved on this device';
+  render();
+  if (isNew) setTimeout(() => inputEl.focus(), 0);
+
+  return {
+    add(item) { items[uid()] = item; save(); render(); },
+    toggle(itemId, done) { if (items[itemId]) { items[itemId].done = done; save(); render(); } },
+    remove(itemId) { delete items[itemId]; save(); render(); },
+    setName() { save(); },
+  };
+}
+
+// ---------- SHARED store (Firebase, per list path) ----------
+let _fbDb = null;
+async function fbDb() {
+  if (_fbDb) return _fbDb;
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  const { getDatabase } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+  _fbDb = getDatabase(initializeApp(firebaseConfig));
+  return _fbDb;
+}
+async function makeSharedStore(id) {
+  const db = await fbDb();
+  const { ref, onValue, update, remove, set } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+  const base = "lists/" + id;
+
+  onValue(ref(db, base + "/items"), (snap) => { items = snap.val() || {}; render(); });
+  onValue(ref(db, base + "/name"), (snap) => {
+    if (snap.exists()) { listNameEl.value = snap.val(); renameList(id, snap.val()); }
+  });
+  statusEl.innerHTML = '<span class="dot shared"></span>Shared live with your group';
+
+  return {
+    add(item) { set(ref(db, base + "/items/" + uid()), item); },
+    toggle(itemId, done) { update(ref(db, base + "/items/" + itemId), { done }); },
+    remove(itemId) { remove(ref(db, base + "/items/" + itemId)); },
+    setName(name) { set(ref(db, base + "/name"), name); },
+  };
+}
+
+// ---------- boot ----------
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const urlList = params.get("list");
+
+  if (urlList) {
+    // opened via a shared link — make sure it's in recents, then open it
+    if (!loadLists().some(l => l.id === urlList)) registerList(urlList, "Shared list");
+    renderRecents();
+    openList(urlList);
+  } else {
+    // land on the hub so they can pick or create a list
+    showWelcome();
+  }
+})();
+
+// ---------- PWA service worker ----------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>

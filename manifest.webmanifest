@@ -1,0 +1,14 @@
+{
+  "name": "Check Club",
+  "short_name": "Check Club",
+  "description": "A sunny shared checklist for family and friends.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAE7CB",
+  "theme_color": "#FAE7CB",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
