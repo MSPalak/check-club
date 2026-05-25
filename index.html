@@ -28,7 +28,7 @@
     --mint: #BFE6D3;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
+  html, body { height: 100%; overflow-x: hidden; max-width: 100%; }
   body {
     margin: 0;
     font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -198,20 +198,21 @@
   .dot.shared { background: var(--accent); }
 
   /* search + assigned-to */
-  .tool-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  /* stacked so both fields are always fully visible on any phone */
+  .tool-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
   .search {
-    flex: 1; display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 8px; min-width: 0;
     background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px;
   }
   .search svg { flex: 0 0 auto; }
   .search input {
-    flex: 1; border: none; outline: none; background: transparent;
-    padding: 13px 0; font-size: 15px; color: var(--text); font-family: inherit;
+    flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+    padding: 14px 0; font-size: 16px; color: var(--text); font-family: inherit;
   }
   .search:focus-within { border-color: var(--accent); }
   #assignTo {
-    width: 42%; max-width: 160px; border: 1px solid var(--line); background: #fff;
-    border-radius: 12px; padding: 13px 12px; font-size: 15px; color: var(--text);
+    width: 100%; border: 1px solid var(--line); background: #fff;
+    border-radius: 12px; padding: 14px 14px; font-size: 16px; color: var(--text);
     outline: none; font-family: inherit;
   }
   #assignTo:focus { border-color: var(--accent); }
