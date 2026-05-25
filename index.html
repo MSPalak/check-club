@@ -165,8 +165,38 @@
   .ios-title { font-family: "Fredoka","Poppins",sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 14px; color: #4a3a16; }
   .ios-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.4; color: var(--text); }
   .ios-steps b { color: var(--accent-dark); }
+  .ios-simple { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--text); }
+  .ios-simple b { color: var(--accent-dark); }
   .share-ic { vertical-align: middle; margin: 0 2px; }
   .ios-note { margin-top: 16px; font-size: 13px; color: #8a7f6f; background: #FAF3E4; padding: 10px 12px; border-radius: 12px; }
+
+  /* share sheet */
+  .share-modal {
+    position: fixed; inset: 0; background: rgba(40,28,52,0.5);
+    display: none; align-items: flex-end; justify-content: center; padding: 14px; z-index: 80;
+  }
+  .share-modal.show { display: flex; }
+  .share-card {
+    background: #fff; border-radius: 22px; padding: 24px 20px; width: 100%; max-width: 440px;
+    position: relative; box-shadow: 0 -12px 44px rgba(0,0,0,0.25);
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  .share-x { position: absolute; top: 10px; right: 14px; border: none; background: none; font-size: 26px; color: var(--muted); cursor: pointer; line-height: 1; }
+  .share-title { font-family: "Fredoka","Poppins",sans-serif; font-weight: 600; font-size: 22px; color: #4a3a16; }
+  .share-sub { font-size: 14px; color: #8a7f6f; margin: 6px 0 16px; line-height: 1.4; }
+  .share-link-box {
+    display: block; background: #FAF3E4; border: 2px dashed #E9D2A6; border-radius: 14px;
+    padding: 16px; font-size: 16px; font-weight: 600; color: var(--accent-dark);
+    word-break: break-all; text-decoration: none; margin-bottom: 16px; line-height: 1.4;
+  }
+  .share-big-btn {
+    display: block; width: 100%; border: none; border-radius: 16px;
+    background: var(--accent); color: #fff; font-family: inherit;
+    font-size: 18px; font-weight: 700; padding: 17px; cursor: pointer; margin-top: 10px;
+    box-shadow: 0 8px 20px rgba(241,87,28,0.28);
+  }
+  .share-big-btn:active { transform: scale(0.99); }
+  .share-big-btn.alt { background: #fff; color: var(--accent-dark); border: 2px solid #F3DFC0; box-shadow: none; }
 
   /* ---------- decorations + animations ---------- */
   .deco { position: absolute; z-index: 1; pointer-events: none; }
@@ -496,15 +526,22 @@
     <div class="ios-card">
       <button class="ios-close" id="iosClose" aria-label="Close">&times;</button>
       <div class="ios-title">Add Check Club to your iPhone 🌞</div>
-      <ol class="ios-steps">
-        <li>Tap the <b>Share</b> button
-          <svg class="share-ic" width="17" height="20" viewBox="0 0 24 28" fill="none" stroke="#2f7bd6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V16"/><path d="M7 8 L12 3 L17 8"/><path d="M6 12 H4 V25 H20 V12 H18"/></svg>
-          at the bottom of Safari
-        </li>
-        <li>Scroll down and tap <b>“Add to Home Screen”</b></li>
-        <li>Tap <b>Add</b> — that’s it! Open it from your home screen like any app 🎉</li>
-      </ol>
-      <div class="ios-note">Make sure you opened this link in <b>Safari</b> (not Chrome) for this to work.</div>
+      <p class="ios-simple">Just tap the link and open it in <b>Safari</b> — then tap
+        <b>Share</b>
+        <svg class="share-ic" width="16" height="19" viewBox="0 0 24 28" fill="none" stroke="#2f7bd6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V16"/><path d="M7 8 L12 3 L17 8"/><path d="M6 12 H4 V25 H20 V12 H18"/></svg>
+        → <b>Add to Home Screen</b>.</p>
+    </div>
+  </div>
+
+  <!-- Share sheet -->
+  <div id="shareModal" class="share-modal">
+    <div class="share-card">
+      <button class="share-x" id="shareX" aria-label="Close">&times;</button>
+      <div class="share-title">Share this list 🔗</div>
+      <div class="share-sub">Anyone who opens this link can view &amp; tick off this list.</div>
+      <a id="shareLinkBox" class="share-link-box" target="_blank" rel="noopener"></a>
+      <button id="shareSendBtn" class="share-big-btn">📤 Send to family &amp; friends</button>
+      <button id="shareCopyBtn" class="share-big-btn alt">📋 Copy link</button>
     </div>
   </div>
 
@@ -650,6 +687,13 @@ async function openList(id, isNew) {
     console.error("Falling back to local mode:", err);
     store = makeLocalStore(id, isNew);
   }
+  // for a brand-new list, push its chosen name to the store (so shared/Firebase shows it too)
+  if (isNew) {
+    const entry = loadLists().find(l => l.id === id);
+    const nm = entry ? entry.name : listNameEl.value;
+    listNameEl.value = nm;
+    if (store.setName) store.setName(nm);
+  }
   showList();
 }
 
@@ -675,14 +719,35 @@ listNameEl.addEventListener("change", () => {
 // back to the lists hub
 backBtn.addEventListener("click", showWelcome);
 
-// share the current list
-shareBtn.addEventListener("click", async () => {
-  const url = location.origin + location.pathname + "?list=" + currentListId;
-  try {
-    await navigator.clipboard.writeText(url);
-    toast(firebaseReady ? "Link copied! Anyone in your group can open & edit it." : "Link copied. (Live sharing turns on once the group database is connected.)");
-  } catch {
-    window.prompt("Copy this link to share your list:", url);
+// share the current list — open a friendly share sheet with the link shown big
+const shareModal   = document.getElementById("shareModal");
+const shareX       = document.getElementById("shareX");
+const shareLinkBox = document.getElementById("shareLinkBox");
+const shareSendBtn = document.getElementById("shareSendBtn");
+const shareCopyBtn = document.getElementById("shareCopyBtn");
+
+function listShareUrl() { return location.origin + location.pathname + "?list=" + currentListId; }
+
+shareBtn.addEventListener("click", () => {
+  const url = listShareUrl();
+  shareLinkBox.textContent = url;
+  shareLinkBox.href = url;
+  shareModal.classList.add("show");
+});
+shareX.addEventListener("click", () => shareModal.classList.remove("show"));
+shareModal.addEventListener("click", (e) => { if (e.target === shareModal) shareModal.classList.remove("show"); });
+
+shareCopyBtn.addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(listShareUrl()); toast("Link copied!"); }
+  catch { window.prompt("Copy this link:", listShareUrl()); }
+});
+shareSendBtn.addEventListener("click", async () => {
+  const url = listShareUrl();
+  const msg = "Join my list on Check Club: ";
+  if (navigator.share) {
+    try { await navigator.share({ title: "Check Club", text: msg, url }); } catch (e) {}
+  } else {
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg + url), "_blank");
   }
 });
 
