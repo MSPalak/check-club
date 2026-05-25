@@ -1,0 +1,14 @@
+{
+  "mimeTypes": {
+    ".webmanifest": "application/manifest+json",
+    ".svg": "image/svg+xml"
+  },
+  "routes": [
+    { "route": "/sw.js", "headers": { "cache-control": "no-cache" } },
+    { "route": "/manifest.webmanifest", "headers": { "cache-control": "no-cache" } }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/sw.js", "/manifest.webmanifest", "/icon.svg", "/*.js", "/*.css", "/*.png", "/*.jpg"]
+  }
+}
