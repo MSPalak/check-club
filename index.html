@@ -198,21 +198,21 @@
   .dot.shared { background: var(--accent); }
 
   /* search + assigned-to */
-  /* stacked so both fields are always fully visible on any phone */
-  .tool-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  /* side by side; min-width:0 lets the search shrink so "Assigned to" never gets pushed off-screen */
+  .tool-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .search {
-    display: flex; align-items: center; gap: 8px; min-width: 0;
-    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px;
+    flex: 1.3 1 0; min-width: 0; display: flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0 10px;
   }
   .search svg { flex: 0 0 auto; }
   .search input {
     flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-    padding: 14px 0; font-size: 16px; color: var(--text); font-family: inherit;
+    padding: 13px 0; font-size: 15px; color: var(--text); font-family: inherit;
   }
   .search:focus-within { border-color: var(--accent); }
   #assignTo {
-    width: 100%; border: 1px solid var(--line); background: #fff;
-    border-radius: 12px; padding: 14px 14px; font-size: 16px; color: var(--text);
+    flex: 1 1 0; min-width: 0; border: 1px solid var(--line); background: #fff;
+    border-radius: 12px; padding: 13px 12px; font-size: 15px; color: var(--text);
     outline: none; font-family: inherit;
   }
   #assignTo:focus { border-color: var(--accent); }
