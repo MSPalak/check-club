@@ -150,6 +150,24 @@
     cursor: pointer; padding: 0 4px;
   }
 
+  /* iPhone Add-to-Home-Screen guide */
+  .ios-help {
+    position: fixed; inset: 0; background: rgba(40,28,52,0.5);
+    display: none; align-items: flex-end; justify-content: center; padding: 14px; z-index: 80;
+  }
+  .ios-help.show { display: flex; }
+  .ios-card {
+    background: #fff; border-radius: 22px; padding: 22px 20px 24px; width: 100%; max-width: 420px;
+    position: relative; box-shadow: 0 -12px 44px rgba(0,0,0,0.25);
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  .ios-close { position: absolute; top: 10px; right: 14px; border: none; background: none; font-size: 26px; color: var(--muted); cursor: pointer; line-height: 1; }
+  .ios-title { font-family: "Fredoka","Poppins",sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 14px; color: #4a3a16; }
+  .ios-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.4; color: var(--text); }
+  .ios-steps b { color: var(--accent-dark); }
+  .share-ic { vertical-align: middle; margin: 0 2px; }
+  .ios-note { margin-top: 16px; font-size: 13px; color: #8a7f6f; background: #FAF3E4; padding: 10px 12px; border-radius: 12px; }
+
   /* ---------- decorations + animations ---------- */
   .deco { position: absolute; z-index: 1; pointer-events: none; }
   .sun     { top: -16px; left: -22px; animation: bob 5s ease-in-out infinite; }
@@ -471,6 +489,23 @@
     <span id="installText" class="ib-text">Install Check Club as an app</span>
     <button id="installBtn" class="ib-btn">Install</button>
     <button id="installClose" class="ib-close" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- iPhone "Add to Home Screen" guide -->
+  <div id="iosHelp" class="ios-help">
+    <div class="ios-card">
+      <button class="ios-close" id="iosClose" aria-label="Close">&times;</button>
+      <div class="ios-title">Add Check Club to your iPhone 🌞</div>
+      <ol class="ios-steps">
+        <li>Tap the <b>Share</b> button
+          <svg class="share-ic" width="17" height="20" viewBox="0 0 24 28" fill="none" stroke="#2f7bd6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V16"/><path d="M7 8 L12 3 L17 8"/><path d="M6 12 H4 V25 H20 V12 H18"/></svg>
+          at the bottom of Safari
+        </li>
+        <li>Scroll down and tap <b>“Add to Home Screen”</b></li>
+        <li>Tap <b>Add</b> — that’s it! Open it from your home screen like any app 🎉</li>
+      </ol>
+      <div class="ios-note">Make sure you opened this link in <b>Safari</b> (not Chrome) for this to work.</div>
+    </div>
   </div>
 
 <script type="module">
@@ -853,10 +888,17 @@ if ("serviceWorker" in navigator) {
   });
   window.addEventListener("appinstalled", () => { hide(); localStorage.setItem(DISMISS_KEY, "1"); });
 
-  // iPhone/iPad Safari: no programmatic prompt allowed → show a hint instead
+  // iPhone/iPad Safari: no programmatic prompt allowed → open a step-by-step guide
+  const iosHelp = document.getElementById("iosHelp");
+  const iosClose = document.getElementById("iosClose");
+  iosClose.addEventListener("click", () => iosHelp.classList.remove("show"));
+  iosHelp.addEventListener("click", (e) => { if (e.target === iosHelp) iosHelp.classList.remove("show"); });
+
   if (isIOS()) {
-    text.textContent = "To install: tap Share, then “Add to Home Screen”";
-    btn.style.display = "none";
+    text.textContent = "Add Check Club to your iPhone";
+    btn.textContent = "Show me how";
+    btn.style.display = "";
+    btn.addEventListener("click", () => iosHelp.classList.add("show"));
     setTimeout(show, 1500);
   }
 })();
