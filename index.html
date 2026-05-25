@@ -126,50 +126,6 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* install-as-app banner */
-  .install-banner {
-    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%) translateY(140%);
-    display: none; align-items: center; gap: 10px;
-    background: #fff; color: var(--text);
-    border: 1px solid #F3E6C8; border-radius: 16px;
-    padding: 10px 12px 10px 14px; z-index: 60;
-    box-shadow: 0 10px 30px rgba(120,84,40,0.18);
-    width: calc(100% - 28px); max-width: 460px;
-    transition: transform .3s ease;
-  }
-  .install-banner.show { display: flex; transform: translateX(-50%) translateY(0); }
-  .ib-emoji { font-size: 20px; }
-  .ib-text { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.3; }
-  .ib-btn {
-    border: none; background: var(--accent); color: #fff; font-weight: 700; font-family: inherit;
-    border-radius: 10px; padding: 9px 16px; font-size: 14px; cursor: pointer; white-space: nowrap;
-  }
-  .ib-btn:active { opacity: 0.9; }
-  .ib-close {
-    border: none; background: none; color: var(--muted); font-size: 22px; line-height: 1;
-    cursor: pointer; padding: 0 4px;
-  }
-
-  /* iPhone Add-to-Home-Screen guide */
-  .ios-help {
-    position: fixed; inset: 0; background: rgba(40,28,52,0.5);
-    display: none; align-items: flex-end; justify-content: center; padding: 14px; z-index: 80;
-  }
-  .ios-help.show { display: flex; }
-  .ios-card {
-    background: #fff; border-radius: 22px; padding: 22px 20px 24px; width: 100%; max-width: 420px;
-    position: relative; box-shadow: 0 -12px 44px rgba(0,0,0,0.25);
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
-  }
-  .ios-close { position: absolute; top: 10px; right: 14px; border: none; background: none; font-size: 26px; color: var(--muted); cursor: pointer; line-height: 1; }
-  .ios-title { font-family: "Fredoka","Poppins",sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 14px; color: #4a3a16; }
-  .ios-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.4; color: var(--text); }
-  .ios-steps b { color: var(--accent-dark); }
-  .ios-simple { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--text); }
-  .ios-simple b { color: var(--accent-dark); }
-  .share-ic { vertical-align: middle; margin: 0 2px; }
-  .ios-note { margin-top: 16px; font-size: 13px; color: #8a7f6f; background: #FAF3E4; padding: 10px 12px; border-radius: 12px; }
-
   /* ---------- decorations + animations ---------- */
   .deco { position: absolute; z-index: 1; pointer-events: none; }
   .sun     { top: -16px; left: -22px; animation: bob 5s ease-in-out infinite; }
@@ -484,27 +440,6 @@
   </section>
 
   <div id="toast" class="toast"></div>
-
-  <!-- Install-as-app banner (PWA) -->
-  <div id="installBanner" class="install-banner">
-    <span class="ib-emoji">📲</span>
-    <span id="installText" class="ib-text">Install Check Club as an app</span>
-    <button id="installBtn" class="ib-btn">Install</button>
-    <button id="installClose" class="ib-close" aria-label="Dismiss">&times;</button>
-  </div>
-
-  <!-- iPhone "Add to Home Screen" guide -->
-  <div id="iosHelp" class="ios-help">
-    <div class="ios-card">
-      <button class="ios-close" id="iosClose" aria-label="Close">&times;</button>
-      <div class="ios-title">Add Check Club to your iPhone 🌞</div>
-      <p class="ios-simple">Just tap the link and open it in <b>Safari</b> — then tap
-        <b>Share</b>
-        <svg class="share-ic" width="16" height="19" viewBox="0 0 24 28" fill="none" stroke="#2f7bd6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V16"/><path d="M7 8 L12 3 L17 8"/><path d="M6 12 H4 V25 H20 V12 H18"/></svg>
-        → <b>Add to Home Screen</b>.</p>
-    </div>
-  </div>
-
 
 <script type="module">
 /* ============================================================
@@ -854,59 +789,6 @@ async function makeSharedStore(id) {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
 }
-
-// ---------- Install-as-app prompt ----------
-(() => {
-  const banner   = document.getElementById("installBanner");
-  const btn      = document.getElementById("installBtn");
-  const closeBtn = document.getElementById("installClose");
-  const text     = document.getElementById("installText");
-  const DISMISS_KEY = "checkClub.installDismissed";
-
-  const isStandalone = () =>
-    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-
-  const show = () => banner.classList.add("show");
-  const hide = () => banner.classList.remove("show");
-  let deferred = null;
-
-  closeBtn.addEventListener("click", () => { hide(); localStorage.setItem(DISMISS_KEY, "1"); });
-
-  // already installed, or user dismissed before → don't nag
-  if (isStandalone() || localStorage.getItem(DISMISS_KEY)) return;
-
-  // Android / Chrome / Edge: real one-tap install
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferred = e;
-    text.textContent = "Install Check Club as an app";
-    btn.style.display = "";
-    show();
-  });
-  btn.addEventListener("click", async () => {
-    if (!deferred) return;
-    deferred.prompt();
-    await deferred.userChoice;
-    deferred = null;
-    hide();
-  });
-  window.addEventListener("appinstalled", () => { hide(); localStorage.setItem(DISMISS_KEY, "1"); });
-
-  // iPhone/iPad Safari: no programmatic prompt allowed → open a step-by-step guide
-  const iosHelp = document.getElementById("iosHelp");
-  const iosClose = document.getElementById("iosClose");
-  iosClose.addEventListener("click", () => iosHelp.classList.remove("show"));
-  iosHelp.addEventListener("click", (e) => { if (e.target === iosHelp) iosHelp.classList.remove("show"); });
-
-  if (isIOS()) {
-    text.textContent = "Add Check Club to your iPhone";
-    btn.textContent = "Show me how";
-    btn.style.display = "";
-    btn.addEventListener("click", () => iosHelp.classList.add("show"));
-    setTimeout(show, 1500);
-  }
-})();
 </script>
 </body>
 </html>
