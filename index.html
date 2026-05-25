@@ -126,6 +126,30 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* install-as-app banner */
+  .install-banner {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%) translateY(140%);
+    display: none; align-items: center; gap: 10px;
+    background: #fff; color: var(--text);
+    border: 1px solid #F3E6C8; border-radius: 16px;
+    padding: 10px 12px 10px 14px; z-index: 60;
+    box-shadow: 0 10px 30px rgba(120,84,40,0.18);
+    width: calc(100% - 28px); max-width: 460px;
+    transition: transform .3s ease;
+  }
+  .install-banner.show { display: flex; transform: translateX(-50%) translateY(0); }
+  .ib-emoji { font-size: 20px; }
+  .ib-text { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .ib-btn {
+    border: none; background: var(--accent); color: #fff; font-weight: 700; font-family: inherit;
+    border-radius: 10px; padding: 9px 16px; font-size: 14px; cursor: pointer; white-space: nowrap;
+  }
+  .ib-btn:active { opacity: 0.9; }
+  .ib-close {
+    border: none; background: none; color: var(--muted); font-size: 22px; line-height: 1;
+    cursor: pointer; padding: 0 4px;
+  }
+
   /* ---------- decorations + animations ---------- */
   .deco { position: absolute; z-index: 1; pointer-events: none; }
   .sun     { top: -16px; left: -22px; animation: bob 5s ease-in-out infinite; }
@@ -440,6 +464,14 @@
   </section>
 
   <div id="toast" class="toast"></div>
+
+  <!-- Install-as-app banner (PWA) -->
+  <div id="installBanner" class="install-banner">
+    <span class="ib-emoji">📲</span>
+    <span id="installText" class="ib-text">Install Check Club as an app</span>
+    <button id="installBtn" class="ib-btn">Install</button>
+    <button id="installClose" class="ib-close" aria-label="Dismiss">&times;</button>
+  </div>
 
 <script type="module">
 /* ============================================================
@@ -782,6 +814,52 @@ async function makeSharedStore(id) {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
 }
+
+// ---------- Install-as-app prompt ----------
+(() => {
+  const banner   = document.getElementById("installBanner");
+  const btn      = document.getElementById("installBtn");
+  const closeBtn = document.getElementById("installClose");
+  const text     = document.getElementById("installText");
+  const DISMISS_KEY = "checkClub.installDismissed";
+
+  const isStandalone = () =>
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+  const show = () => banner.classList.add("show");
+  const hide = () => banner.classList.remove("show");
+  let deferred = null;
+
+  closeBtn.addEventListener("click", () => { hide(); localStorage.setItem(DISMISS_KEY, "1"); });
+
+  // already installed, or user dismissed before → don't nag
+  if (isStandalone() || localStorage.getItem(DISMISS_KEY)) return;
+
+  // Android / Chrome / Edge: real one-tap install
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferred = e;
+    text.textContent = "Install Check Club as an app";
+    btn.style.display = "";
+    show();
+  });
+  btn.addEventListener("click", async () => {
+    if (!deferred) return;
+    deferred.prompt();
+    await deferred.userChoice;
+    deferred = null;
+    hide();
+  });
+  window.addEventListener("appinstalled", () => { hide(); localStorage.setItem(DISMISS_KEY, "1"); });
+
+  // iPhone/iPad Safari: no programmatic prompt allowed → show a hint instead
+  if (isIOS()) {
+    text.textContent = "To install: tap Share, then “Add to Home Screen”";
+    btn.style.display = "none";
+    setTimeout(show, 1500);
+  }
+})();
 </script>
 </body>
 </html>
